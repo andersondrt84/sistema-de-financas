@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="grid">
+  <div class="card">
+    <h2>Adicionar Ganho</h2>
+    <form method="post" action="{{ url_for('add_income') }}">
+      <label>Descrição</label>
+      <input name="description" placeholder="Ex: Salário" />
+      <label>Valor ganho (R$)</label>
+      <input name="amount" placeholder="3500,00" required />
+      <label>Descontos (R$)</label>
+      <input name="discount" placeholder="250,00" value="0,00" required />
+      <button type="submit">Salvar ganho</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Adicionar Despesa</h2>
+    <form method="post" action="{{ url_for('add_expense') }}">
+      <label>Despesa</label>
+      <input name="description" placeholder="Ex: Gasolina" required />
+      <label>Custo (R$)</label>
+      <input name="amount" placeholder="10,00" required />
+      <button type="submit">Salvar despesa</button>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Resumo Financeiro</h2>
+  <div class="stats">
+    <p>Total de ganhos: <strong>R$ {{ '%.2f'|format(total_income) }}</strong></p>
+    <p>Total de descontos: <strong>R$ {{ '%.2f'|format(total_discount) }}</strong></p>
+    <p>Total de despesas: <strong>R$ {{ '%.2f'|format(total_expense) }}</strong></p>
+    <p>Valor líquido (ganhos - descontos): <strong>R$ {{ '%.2f'|format(net_income) }}</strong></p>
+    <p class="{{ 'positive' if balance >= 0 else 'negative' }}">
+      Resultado final: <strong>R$ {{ '%.2f'|format(balance) }}</strong>
+      ({{ 'Positivo' if balance >= 0 else 'Negativo' }})
+    </p>
+  </div>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h3>Ganhos</h3>
+    <ul>
+      {% for i in incomes %}
+      <li>{{ i.description }} — R$ {{ '%.2f'|format(i.amount) }} (desconto: R$ {{ '%.2f'|format(i.discount) }})</li>
+      {% else %}
+      <li>Nenhum ganho registrado.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Despesas</h3>
+    <ul>
+      {% for e in expenses %}
+      <li>{{ e.description }} — R$ {{ '%.2f'|format(e.amount) }}</li>
+      {% else %}
+      <li>Nenhuma despesa registrada.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card small">
+  <h2>Alterar senha</h2>
+  <form method="post">
+    <label>Senha atual</label>
+    <input type="password" name="current_password" required />
+    <label>Nova senha</label>
+    <input type="password" name="new_password" minlength="8" required />
+    <button type="submit">Atualizar senha</button>
+  </form>
+</section>
+{% endblock %}
