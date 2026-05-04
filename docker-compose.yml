@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: financas_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: troque-esta-chave-em-producao
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/financas_db
+    ports:
+      - "6000:6000"
+
+  db:
+    image: postgres:16-alpine
+    container_name: financas_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: financas_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d financas_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

@@ -177,8 +177,13 @@ def seed_default_user():
         db.session.commit()
 
 
-if __name__ == "__main__":
+def init_db():
     with app.app_context():
         db.create_all()
         seed_default_user()
+
+
+init_db()
+
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=6000, debug=True)
