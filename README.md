@@ -49,3 +49,7 @@ python app.py
 ```
 
 A aplicação iniciará na porta **6000**.
+
+
+## Prévia visual
+![Prévia da interface](docs/preview.svg)
