@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card small">
+  <h2>Login</h2>
+  <p>Usuário padrão: <strong>anderson</strong> | Senha: <strong>12345678</strong></p>
+  <form method="post">
+    <label>Usuário</label>
+    <input name="username" required />
+
+    <label>Senha</label>
+    <input type="password" name="password" required />
+
+    <button type="submit">Entrar</button>
+  </form>
+</section>
+{% endblock %}
