@@ -1,0 +1,22 @@
+services:
+  elo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sistema-de-financas:local
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3080}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
