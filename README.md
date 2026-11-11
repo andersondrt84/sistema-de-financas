@@ -53,6 +53,39 @@ O container também aparecerá no Portainer. Para atualizar, use `git pull --ff-
 
 Esta versão guarda os lançamentos no navegador (localStorage), não no container. Reiniciar o container não apaga esses dados; limpar o navegador apaga. Não existe banco de dados, login ou sincronização entre você e sua esposa. Cada navegador tem seus próprios registros. Exporte o backup antes de mudar endereço, porta ou protocolo, pois cada origem possui armazenamento separado; importe no novo endereço. Um volume Docker não muda esse comportamento.
 
-### Docker Swarm
+## Portainer com Docker Swarm
 
-`docker stack deploy` ignora `build`. O arquivo `compose.yaml` é destinado a Docker Standalone. Para Swarm, primeiro publique a imagem em um registry acessível por todos os nós e use uma stack com `image` apontando para ela; a imagem `sistema-de-financas:local` não é publicada automaticamente. A configuração final depende do registry e do proxy/rede do seu servidor.
+Use **`stack.swarm.yml`** em vez de `compose.yaml`. A stack usa uma imagem pronta, sem `build`, compatível com nós Linux AMD64 e ARM64.
+
+### 1. Aguarde a publicação da imagem
+
+Abra a aba **Actions** deste repositório e aguarde o workflow **Publicar imagem Docker** terminar com sucesso. Ele executa os testes e publica:
+
+`ghcr.io/andersondrt84/sistema-de-financas:latest`
+
+Também existe uma tag com o SHA completo de cada commit, para fixar uma versão ou voltar à anterior. O workflow pode ser iniciado manualmente por **Run workflow**. As permissões `packages: write` usam o token automático do GitHub; não é preciso adicionar token aos arquivos.
+
+### 2. Permita que o Swarm baixe a imagem
+
+Na primeira publicação, o pacote GHCR pode ficar privado, mesmo que o repositório seja público. No GitHub, abra seu perfil → **Packages → sistema-de-financas → Package settings**. Se quiser permitir download sem login, altere a visibilidade do **pacote** para **Public**; isso publica a imagem da aplicação, não seus lançamentos financeiros.
+
+Se preferir o pacote privado, adicione no Portainer um registry autenticado para `ghcr.io`, com usuário GitHub e token com `read:packages`, fornecido apenas no campo seguro do Portainer. Garanta que a autenticação do registry seja enviada aos nós durante o deploy. A autenticação Git para clonar repositório privado é separada da autenticação do registry.
+
+### 3. Crie a stack pelo painel
+
+No ambiente Swarm, abra **Stacks → Add stack → Repository**:
+
+- Nome: `elo-financas`
+- Repository URL: `https://github.com/andersondrt84/sistema-de-financas`
+- Repository reference: `refs/heads/main`
+- Compose path: **`stack.swarm.yml`**
+
+Clique em **Deploy the stack**. Se preferir, use **Web editor** e cole o conteúdo de `stack.swarm.yml`. Aguarde o serviço ter **1/1 réplica** e a tarefa ficar saudável. A aplicação fica na porta **3080** de um nó do Swarm, através do routing mesh. Essa porta deve estar livre e acessível na rede do servidor. Para alterá-la, edite `published` na stack.
+
+### Atualizações e diagnóstico
+
+Após uma alteração em `main`, aguarde o workflow de publicação. No Portainer, atualize a stack/serviço solicitando novo download da imagem (re-pull). Publicar uma nova imagem não atualiza automaticamente os serviços em execução. Para versões fixas, substitua `latest` pelo SHA de uma publicação concluída.
+
+Se a tarefa ficar `Rejected` com erro de pull, confira publicação da imagem e autenticação GHCR. Se a porta estiver ocupada, altere `published`. Se falhar o healthcheck, consulte os logs da tarefa. No manager, os comandos equivalentes são `docker stack services elo-financas`, `docker service ps elo-financas_elo --no-trunc` e `docker service logs elo-financas_elo`.
+
+A configuração não pressupõe Traefik, domínio ou rede externa. Para usar seu proxy reverso, ajuste a rede e as regras conforme sua instalação. Os dados continuam no navegador; a stack não adiciona banco de dados ou sincronização.
